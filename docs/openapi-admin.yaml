@@ -1,0 +1,305 @@
+openapi: 3.0.0
+servers:
+  - url: http://localhost:32800/admin
+    description: Local environment
+  - url: http://api.m32.gobizdev.com
+    description: Staging enviroment
+  - url: http://dev-1-api.m32.gobizdev.com
+    description: dev-1 enviroment
+  - url: http://dev-2-api.m32.gobizdev.com
+    description: dev-2 enviroment
+  - url: http://dev-3-api.m32.gobizdev.com
+    description: dev-3 enviroment
+info:
+  description: This is api docs of M32
+  version: "1.0.0"
+  title: Api docs of M32
+  contact:
+    email: vuduythanh@gobiz.vn
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+
+tags:
+  - name: shipping-providers
+    description: Shipping providers
+  - name: applications
+    description: Applications
+
+paths:
+  /shipping-providers:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - shipping-providers
+      summary: Danh sách đối tác vận chuyển đang sử dụng
+      operationId: shipping-providers-list-providers
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  providers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ShippingProvider'
+  /applications/{id}/shipping-partners:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - applications
+      summary: Danh sách đối tác vận chuyển của 1 app
+      operationId: application-listing-shipping-partners
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  shipping_partners:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ShippingPartner'
+        '400':
+          description: INPUT_INVALID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  application_id:
+                    type: string
+                    example:
+                      "exists"
+
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - applications
+      summary: Thêm một đối tác vận chuyển vào ứng dụng
+      operationId: application-create-shipping-partners
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: number
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  required: true
+                code:
+                  type: string
+                  required: true
+                description:
+                  type: string
+                partner_code:
+                  type: string
+                  required: true
+                setting_params:
+                  type: object
+                  properties:
+                    shop_id:
+                      type: string
+                    token:
+                      type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  shipping_partner:
+                    $ref: '#/components/schemas/ShippingPartner'
+        '400':
+          description: INPUT_INVALID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  application_id:
+                    type: string
+                    example:
+                      "exists"
+                  code:
+                    type: string
+                    example:
+                      "already_exist"
+
+  /applications/{id}/webhook-url:
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - applications
+      summary: Cập nhật url webhook cho một application
+      operationId: application-webhook-url
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: number
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                webhook_url:
+                  type: string
+                  required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  application:
+                    $ref: '#/components/schemas/Application'
+        '400':
+          description: INPUT_INVALID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  application_id:
+                    type: string
+                    example:
+                      "exists"
+                  webhook_url:
+                    type: string
+                    example:
+                      "required"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    Application:
+      type: object
+      properties:
+        creator_id:
+          type: number
+        code:
+          type: string
+          example:
+            "local_transport"
+        hidden_secret:
+          type: string
+          example:
+            "xxx"
+        name:
+          type: string
+          example:
+            "Ứng dụng giao hàng nội địa"
+        description:
+          type: string
+        avatar:
+          type: string
+        allowed_ips:
+          type: array
+          items:
+            type: string
+        webhook_url:
+          type: string
+          example:
+            "https://xxx.com"
+        status:
+          type: string
+          example:
+            "ACTIVE"
+    ShippingProvider:
+      type: object
+      properties:
+        code:
+          type: string
+          example:
+            "GHN"
+        setting_params:
+          type: array
+          items:
+            type: object
+            properties:
+              name:
+                type: string
+                example:
+                  "token"
+              type:
+                type: string
+                example:
+                  "text"
+              label:
+                type: string
+                example:
+                  "Access Token"
+              rules:
+                type: array
+                items:
+                  type: string
+                  example:
+                    "required"
+    ShippingPartner:
+      type: object
+      properties:
+        application_id:
+          type: number
+          example:
+            1
+        partner_code:
+          type: string
+          example:
+            "GHN"
+        type:
+          type: string
+          example:
+            "text"
+        code:
+          type: string
+          example:
+            "TK-1"
+        name:
+          type: string
+          example:
+            "Tài khoản 1"
+        desciption:
+          type: string
+          example:
+            "Tài khoản snappy cho khách lẻ"
+        settings:
+          type: array
+          items:
+            type: object
+        status:
+          type: string
+          example:
+            "ACTIVE"
+
+
+

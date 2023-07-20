@@ -1,0 +1,8 @@
+.page-break {
+    border: 1px solid black;
+    padding: 5px;
+    max-width: 1140px;
+    min-width: 748px;
+    margin: 0 auto;
+    margin-bottom: 10px;
+}

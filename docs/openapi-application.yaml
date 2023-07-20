@@ -1,0 +1,130 @@
+openapi: 3.0.0
+servers:
+  - url: http://localhost:32800/application
+    description: Local environment
+  - url: http://xxx
+    description: Staging enviroment
+info:
+  description: This is api docs of M32
+  version: "1.0.0"
+  title: Api docs of M32
+  contact:
+    email: vuduythanh@gobiz.vn
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+
+tags:
+  - name: access-tokens
+    description: Access Tokens
+  - name: orders
+    description: Orders
+
+paths:
+  /access-tokens:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - access-tokens
+      summary: Tạo Access Token
+      operationId: access-tokens-create-token
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+  /shipping-partners/{code}/stamps:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - order-stamps
+      summary: Lấy URL in tem của danh sách đơn
+      operationId: order-stamps
+      parameters:
+        - in: path
+          name: code
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: tracking_nos
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+        '400':
+          description: INPUT_INVALID
+          content:
+            application/json:
+              schema:
+                type: object
+  /orders/mapping-trackings:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - orders
+      summary: Kiểm tra và map lại vận đơn đã tồn tại trên hệ thống của DVVC
+      operationId: OrderMappingTrackings
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                trackings:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      shipping_partner:
+                        type: string
+                      ref:
+                        type: string
+                      tracking_no:
+                        type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+        '400':
+          description: INPUT_INVALID
+          content:
+            application/json:
+              schema:
+                type: object
+
+components:
+  securitySchemes:
+    Authorization:
+      in: header
+      name: Authorization
+      type: apiKey
+    bearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+
+
+
